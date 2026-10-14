@@ -1,617 +1,628 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Randomized Complete Block Design (RCBD)</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RCBD Randomization and Statistical Analysis</title>
 <style>
-    * {
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: Arial, sans-serif;
-        max-width: 1100px;
-        margin: 30px auto;
-        padding: 20px;
-        color: #222;
-        background: #f5f7fa;
-    }
-
-    header {
-        text-align: center;
-        margin-bottom: 25px;
-    }
-
-    h1 {
-        font-size: 26px;
-        margin-bottom: 10px;
-    }
-
-    .author {
-        font-size: 14px;
-        color: #555;
-    }
-
-    section {
-        background: white;
-        padding: 20px;
-        margin-bottom: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px #00000010;
-    }
-
-    h2 {
-        font-size: 19px;
-        margin-top: 0;
-    }
-
-    .controls {
-        display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-        align-items: end;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 6px;
-        font-weight: bold;
-    }
-
-    input {
-        width: 100%;
-        min-width: 75px;
-        padding: 9px;
-        border: 1px solid #bbb;
-        border-radius: 4px;
-    }
-
-    button {
-        padding: 10px 16px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: bold;
-    }
-
-    .primary {
-        background: #174ea6;
-        color: white;
-    }
-
-    .secondary {
-        background: #e5e7eb;
-        color: #222;
-    }
-
-    .table-wrap {
-        overflow-x: auto;
-        margin-top: 15px;
-    }
-
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        min-width: 450px;
-    }
-
-    th, td {
-        border: 1px solid #ccc;
-        padding: 9px;
-        text-align: center;
-    }
-
-    th {
-        background: #eaf0f8;
-    }
-
-    td input {
-        min-width: 65px;
-        text-align: center;
-    }
-
-    .note {
-        color: #555;
-        font-size: 13px;
-        line-height: 1.5;
-    }
-
-    .error {
-        color: #b42318;
-        font-weight: bold;
-    }
-
-    .formula {
-        font-family: Georgia, serif;
-        background: #f5f7fa;
-        padding: 12px;
-        margin: 8px 0;
-        overflow-x: auto;
-    }
-
-    footer {
-        text-align: center;
-        color: #666;
-        font-size: 12px;
-        margin-top: 25px;
-    }
-
-    @media print {
-        body {
-            background: white;
-            margin: 0;
-        }
-        section {
-            box-shadow: none;
-            border: 1px solid #ddd;
-        }
-        button, .controls {
-            display: none;
-        }
-    }
+* { box-sizing: border-box; }
+body {
+  font-family: Arial, sans-serif;
+  max-width: 1200px; margin: 25px auto; padding: 16px;
+  background: #f3f6fa; color: #263445; line-height: 1.5;
+}
+header { text-align: center; margin-bottom: 25px; }
+h1 { color: #174a70; font-size: 27px; }
+.author { color: #64748b; font-size: 14px; }
+section {
+  background: white; padding: 22px; margin: 18px 0;
+  border: 1px solid #dce4ec; border-radius: 10px;
+  box-shadow: 0 2px 8px #0000000a;
+}
+h2 {
+  color: #174a70; font-size: 21px;
+  border-bottom: 2px solid #e4edf5; padding-bottom: 8px;
+}
+h3 { color: #285b7b; margin-top: 22px; }
+.controls { display: flex; gap: 14px; flex-wrap: wrap; align-items: end; }
+label { display: block; font-weight: bold; margin-bottom: 6px; }
+input, select {
+  padding: 10px; border: 1px solid #b8c4d0; border-radius: 6px;
+  font-size: 15px; max-width: 100%;
+}
+input[type=number] {
+  width: 155px; appearance: textfield; -moz-appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none; margin: 0;
+}
+button {
+  border: 0; border-radius: 6px; padding: 10px 15px;
+  font-weight: bold; cursor: pointer; margin: 5px 5px 5px 0;
+}
+button:hover { filter: brightness(.93); }
+.primary { background: #1758a6; color: white; }
+.green { background: #287b50; color: white; }
+.dark { background: #526779; color: white; }
+.light { background: #e5eaf0; color: #263445; }
+.status, .result, .hypothesis, .warning {
+  padding: 13px 16px; margin: 12px 0; border-radius: 6px;
+}
+.status, .result { background: #eff8f2; border-left: 4px solid #287b50; }
+.hypothesis { background: #f0f7fc; border-left: 4px solid #176b87; }
+.warning { background: #fff8e8; border-left: 4px solid #d49b23; }
+.error { color: #b42318; font-weight: bold; }
+.note { color: #5b6574; font-size: 13px; }
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+table { border-collapse: collapse; width: 100%; background: white; }
+th, td {
+  border: 1px solid #cbd5df; padding: 9px;
+  text-align: center;
+}
+th { background: #eaf1f8; color: #20394f; }
+.data-input { width: 100%; min-width: 75px; text-align: center; }
+.layout { table-layout: fixed; }
+.layout th { background: #174a70; color: white; }
+.plot { padding: 14px 5px; font-weight: bold; }
+.plot small { display: block; font-weight: normal; }
+.formula {
+  background: #f5f7fa; padding: 12px;
+  margin: 8px 0; overflow-x: auto; font-family: Georgia, serif;
+}
+.hidden { display: none; }
+footer { text-align: center; color: #667085; font-size: 12px; padding: 15px; }
+@media(max-width:600px) {
+  body { padding: 8px; }
+  section { padding: 14px; }
+  .controls > div { width: 100%; }
+  input[type=number] { width: 100%; }
+}
+@media print {
+  body { background: white; margin: 0; padding: 0; }
+  section { box-shadow: none; break-inside: auto; }
+  button, .no-print { display: none !important; }
+  table { font-size: 10px; }
+}
 </style>
 </head>
-
 <body>
 
 <header>
-    <h1>Randomized Complete Block Design (RCBD)</h1>
-    <p class="author">
-        By: Frances Jay B. Pacaldo, LPT, MAED-Math
-    </p>
+  <h1>Randomized Complete Block Design (RCBD)</h1>
+  <p>Randomization, Field Layout, and Statistical Analysis</p>
+  <p class="author">By: Frances Jay B. Pacaldo, LPT, MAED-Math</p>
 </header>
 
 <section>
-    <h2>1. Experimental Design</h2>
-
-    <div class="controls">
-        <div>
-            <label for="treatments">Number of Treatments (t)</label>
-            <input type="number" id="treatments"
-                   value="4" min="2" max="20">
-        </div>
-
-        <div>
-            <label for="blocks">Number of Blocks (b)</label>
-            <input type="number" id="blocks"
-                   value="5" min="2" max="30">
-        </div>
-
-        <button class="primary" onclick="createTable()">
-            Generate Data Table
-        </button>
+  <h2>1. Experimental Design</h2>
+  <div class="controls">
+    <div>
+      <label for="treatments">Number of Treatments (t)</label>
+      <input type="number" id="treatments" min="2" max="26"
+             step="1" value="4">
     </div>
-
-    <p class="note">
-        Enter one observation for every treatment in each block.
-        Each block must contain all treatments exactly once.
-    </p>
+    <div>
+      <label for="blocks">Number of Replications / Blocks (r)</label>
+      <input type="number" id="blocks" min="2" max="30"
+             step="1" value="5">
+    </div>
+    <button class="primary" onclick="applyDesign()">Apply Design</button>
+  </div>
+  <div id="designSummary" class="status"></div>
+  <p class="note">Every block contains each treatment exactly once. Total experimental units: N = tr. Supports 2–26 treatments (A–Z) and 2–30 blocks.</p>
+  <p id="designError" class="error"></p>
 </section>
 
 <section>
-    <h2>2. Enter Experimental Data</h2>
-
-    <div id="dataTable" class="table-wrap"></div>
-
-    <p class="note">
-        Example: rows represent blocks and columns represent treatments.
-        You may edit the sample values before computing.
-    </p>
-
-    <button class="primary" onclick="calculateRCBD()">
-        Calculate RCBD ANOVA
-    </button>
-
-    <button class="secondary" onclick="clearData()">
-        Clear Data
-    </button>
-
-    <button class="secondary" onclick="window.print()">
-        Print Results
-    </button>
-
-    <p id="message" class="error"></p>
+  <h2>2. Randomization Process</h2>
+  <p>Sequence number identifies the treatment. Random numbers are generated independently within each block. Ranking the random numbers from smallest to largest determines the plot number.</p>
+  <button class="primary" onclick="randomizeDesign()">Generate Random Numbers and Assign Treatments</button>
+  <div id="randomizationOutput"></div>
 </section>
 
-<section id="results" style="display:none;">
-    <h2>3. Descriptive Summary</h2>
-    <div id="summary" class="table-wrap"></div>
+<section>
+  <h2>3. Final Field Layout</h2>
+  <p class="note">Plots are arranged in two rows. Read from top to bottom within each column, then continue from left to right. All randomized plots are displayed.</p>
+  <button class="green" onclick="generateLayout()">Generate Final Field Layout</button>
+  <button class="light" onclick="printLayout()">Print Field Layout</button>
+  <div id="layoutOutput" class="table-wrap">Generate the randomization first.</div>
+</section>
 
-    <h2>4. Analysis of Variance (ANOVA)</h2>
+<section>
+  <h2>Analysis of Variance</h2>
+
+  <h3>1. Data Entry</h3>
+  <p>Enter the observed response for each treatment in each block. Treatments are in rows; blocks/replications are in columns.</p>
+  <div class="warning"><strong>Important:</strong> Enter responses according to their treatment and block labels, not their plot positions. Complete all cells.</div>
+  <div id="dataTable" class="table-wrap"></div>
+
+  <div class="controls no-print">
+    <div>
+      <label for="alpha">Significance Level (α)</label>
+      <select id="alpha">
+        <option value="0.10">0.10</option>
+        <option value="0.05" selected>0.05</option>
+        <option value="0.01">0.01</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="green" onclick="calculateRCBD()">Calculate Statistical Results</button>
+  <button class="light" onclick="clearData()">Clear Data</button>
+  <button class="dark" onclick="window.print()">Print Results</button>
+  <p id="message" class="error"></p>
+
+  <div id="results" class="hidden">
+    <h3>2. Steps in Hypothesis Testing</h3>
+    <div id="hypotheses"></div>
+
+    <h3>3. Analysis of Variance (ANOVA) Table</h3>
     <div id="anova" class="table-wrap"></div>
 
-    <p class="note">
-        Decision rule: At the chosen significance level, reject the
-        null hypothesis when the calculated F-value exceeds the
-        corresponding critical F-value. The p-value provides an
-        equivalent significance test.
-    </p>
+    <h3>4. Coefficient of Variation (CV)</h3>
+    <div id="cvOutput"></div>
+
+    <h3>5. Block Efficiency</h3>
+    <div id="efficiencyOutput"></div>
+  </div>
 </section>
 
 <section>
-    <h2>5. Formulas Used</h2>
-
-    <div class="formula">
-        Correction Factor (CF) = G² / N
-    </div>
-
-    <div class="formula">
-        Total SS = Σx² − CF
-    </div>
-
-    <div class="formula">
-        Treatment SS = Σ(T² / b) − CF
-    </div>
-
-    <div class="formula">
-        Block SS = Σ(B² / t) − CF
-    </div>
-
-    <div class="formula">
-        Error SS = Total SS − Treatment SS − Block SS
-    </div>
-
-    <div class="formula">
-        MS = SS / df
-    </div>
-
-    <div class="formula">
-        F-treatment = MS-treatment / MS-error
-    </div>
-
-    <div class="formula">
-        F-block = MS-block / MS-error
-    </div>
-
-    <p class="note">
-        G = grand total; N = total number of observations;
-        T = treatment total; B = block total.
-    </p>
+  <h2>Formulas Used</h2>
+  <h3>Correction Factor</h3>
+  <div class="formula">CF = G² / N</div>
+  <h3>Total Sum of Squares</h3>
+  <div class="formula">SS<sub>Total</sub> = Σx² − CF</div>
+  <h3>Treatment Sum of Squares</h3>
+  <div class="formula">SS<sub>Treatment</sub> = Σ(Tᵢ² / r) − CF</div>
+  <h3>Block Sum of Squares</h3>
+  <div class="formula">SS<sub>Block</sub> = Σ(Bⱼ² / t) − CF</div>
+  <h3>Error Sum of Squares</h3>
+  <div class="formula">SS<sub>Error</sub> = SS<sub>Total</sub> − SS<sub>Treatment</sub> − SS<sub>Block</sub></div>
+  <h3>Degrees of Freedom</h3>
+  <div class="formula">Treatments: t − 1; Blocks: r − 1; Error: (t − 1)(r − 1); Total: tr − 1</div>
+  <h3>F-statistics</h3>
+  <div class="formula">F = MS of source / MS<sub>Error</sub></div>
+  <h3>Coefficient of Variation</h3>
+  <div class="formula">CV (%) = [√MS<sub>Error</sub> / |Grand Mean|] × 100</div>
+  <h3>Relative Block Efficiency</h3>
+  <div class="formula">MS<sub>Error, CRD</sub> = (SS<sub>Block</sub> + SS<sub>Error, RCBD</sub>) / (N − t)</div>
+  <div class="formula">RE (%) = [MS<sub>Error, CRD</sub> / MS<sub>Error, RCBD</sub>] × 100</div>
+  <p class="note">G = grand total; N = total observations; Tᵢ = treatment total; Bⱼ = block total.</p>
 </section>
 
-<footer>
-    Randomized Complete Block Design | Statistical Analysis
-</footer>
+<footer>Randomized Complete Block Design | Statistical Analysis</footer>
 
 <script>
+"use strict";
+
+let t = 4, r = 5, assignments = [], randomized = false;
+
+const $ = id => document.getElementById(id);
+const letter = n => String.fromCharCode(64 + n);
+
 function getDimensions() {
-    const t = Number(document.getElementById("treatments").value);
-    const b = Number(document.getElementById("blocks").value);
+  const treatments = Number($("treatments").value);
+  const blocks = Number($("blocks").value);
 
-    if (!Number.isInteger(t) || !Number.isInteger(b) ||
-        t < 2 || t > 20 || b < 2 || b > 30) {
-        throw new Error(
-            "Treatments must be 2–20 and blocks must be 2–30."
-        );
-    }
-
-    return { t, b };
+  if (!Number.isInteger(treatments) || !Number.isInteger(blocks) ||
+      treatments < 2 || treatments > 26 || blocks < 2 || blocks > 30) {
+    throw new Error("Enter 2–26 treatments and 2–30 blocks.");
+  }
+  return {t: treatments, r: blocks};
 }
 
-function createTable() {
-    try {
-        const { t, b } = getDimensions();
-        let html = "<table><thead><tr><th>Block</th>";
+function applyDesign() {
+  try {
+    ({t, r} = getDimensions());
+    assignments = [];
+    randomized = false;
 
-        for (let j = 0; j < t; j++) {
-            html += `<th>Treatment ${j + 1}</th>`;
-        }
+    $("designSummary").innerHTML =
+      `<strong>Design:</strong> ${t} treatments × ${r} blocks<br>
+       <strong>Total experimental units:</strong> N = tr = ${t*r}`;
 
-        html += "</tr></thead><tbody>";
-
-        for (let i = 0; i < b; i++) {
-            html += `<tr><th>Block ${i + 1}</th>`;
-
-            for (let j = 0; j < t; j++) {
-                const value = 10 + i * 2 + j;
-                html += `
-                    <td>
-                        <input type="number" step="any"
-                            id="x_${i}_${j}"
-                            value="${value}"
-                            aria-label="Block ${i + 1},
-                            Treatment ${j + 1}">
-                    </td>`;
-            }
-
-            html += "</tr>";
-        }
-
-        html += "</tbody></table>";
-
-        document.getElementById("dataTable").innerHTML = html;
-        document.getElementById("message").textContent = "";
-        document.getElementById("results").style.display = "none";
-    } catch (error) {
-        document.getElementById("message").textContent = error.message;
-    }
+    $("designError").textContent = "";
+    $("randomizationOutput").innerHTML = "";
+    $("layoutOutput").textContent = "Generate the randomization first.";
+    $("results").classList.add("hidden");
+    $("message").textContent = "";
+    createDataTable();
+  } catch (e) {
+    $("designError").textContent = e.message;
+  }
 }
 
-function clearData() {
-    try {
-        const { t, b } = getDimensions();
-        for (let i = 0; i < b; i++) {
-            for (let j = 0; j < t; j++) {
-                document.getElementById(`x_${i}_${j}`).value = "";
-            }
-        }
-        document.getElementById("results").style.display = "none";
-        document.getElementById("message").textContent = "";
-    } catch (error) {
-        document.getElementById("message").textContent = error.message;
+function createDataTable() {
+  let html = "<table><thead><tr><th>Treatment</th>";
+  for (let b = 1; b <= r; b++) html += `<th>Block ${b}</th>`;
+  html += "</tr></thead><tbody>";
+
+  for (let i = 1; i <= t; i++) {
+    html += `<tr><th>Treatment ${letter(i)}</th>`;
+    for (let b = 1; b <= r; b++) {
+      html += `<td><input class="data-input" type="number" step="any"
+        id="x_${i}_${b}" aria-label="Treatment ${letter(i)}, Block ${b}"></td>`;
     }
+    html += "</tr>";
+  }
+  $("dataTable").innerHTML = html + "</tbody></table>";
 }
 
-// Regularized incomplete beta function for F-distribution probabilities.
-function betaFraction(a, b, x) {
-    const maxIterations = 200;
-    const epsilon = 3e-14;
-    const tiny = 1e-300;
+function randomizeDesign() {
+  try {
+    ({t, r} = getDimensions());
+    assignments = [];
+    let output = "";
 
-    let qab = a + b;
-    let qap = a + 1;
-    let qam = a - 1;
-    let c = 1;
-    let d = 1 - qab * x / qap;
+    for (let block = 1; block <= r; block++) {
+      const items = Array.from({length: t}, (_, i) => ({
+        sequence: i + 1,
+        treatment: letter(i + 1),
+        randomNumber: Math.floor(Math.random() * 900000) + 100000
+      }));
 
-    if (Math.abs(d) < tiny) d = tiny;
-    d = 1 / d;
-    let h = d;
+      items.sort((a, b) => a.randomNumber - b.randomNumber);
+      items.forEach((item, index) => {
+        item.rank = index + 1;
+        item.plot = index + 1;
+      });
+      assignments.push(items);
 
-    for (let m = 1; m <= maxIterations; m++) {
-        let m2 = 2 * m;
-        let aa = m * (b - m) * x /
-            ((qam + m2) * (a + m2));
+      output += `<h3>Block / Replication ${block}</h3>
+      <div class="table-wrap"><table>
+      <thead><tr><th>Sequence # (Treatment)</th><th>Random Number</th>
+      <th>Rank</th><th>Plot Number</th></tr></thead><tbody>`;
 
-        d = 1 + aa * d;
-        if (Math.abs(d) < tiny) d = tiny;
-        c = 1 + aa / c;
-        if (Math.abs(c) < tiny) c = tiny;
-        d = 1 / d;
-        h *= d * c;
-
-        aa = -(a + m) * (qab + m) * x /
-            ((a + m2) * (qap + m2));
-
-        d = 1 + aa * d;
-        if (Math.abs(d) < tiny) d = tiny;
-        c = 1 + aa / c;
-        if (Math.abs(c) < tiny) c = tiny;
-        d = 1 / d;
-        const delta = d * c;
-        h *= delta;
-
-        if (Math.abs(delta - 1) < epsilon) break;
+      items.forEach(item => {
+        output += `<tr><td>${item.sequence} (${item.treatment})</td>
+        <td>${item.randomNumber}</td><td>${item.rank}</td>
+        <td>Plot ${item.plot}</td></tr>`;
+      });
+      output += "</tbody></table></div>";
     }
 
-    return h;
+    randomized = true;
+    $("randomizationOutput").innerHTML = output;
+    $("layoutOutput").textContent = "Click Generate Final Field Layout.";
+    $("results").classList.add("hidden");
+    $("message").textContent = "";
+  } catch (e) {
+    $("designError").textContent = e.message;
+  }
 }
 
+function generateLayout() {
+  if (!randomized) {
+    $("layoutOutput").innerHTML = '<p class="warning">Generate the randomization first.</p>';
+    return;
+  }
+
+  // Arrange all plots in two rows. Read down each column, then left to right.
+  const totalPlots = t * r;
+  const columns = Math.ceil(totalPlots / 2);
+  let html = `<p><strong>${t} treatments × ${r} blocks; ${totalPlots} plots</strong></p>`;
+  html += '<table class="layout"><tbody>';
+
+  for (let row = 0; row < 2; row++) {
+    html += "<tr>";
+    for (let col = 0; col < columns; col++) {
+      const plotIndex = col * 2 + row;
+      if (plotIndex >= totalPlots) {
+        html += "<td></td>";
+        continue;
+      }
+
+      const blockIndex = Math.floor(plotIndex / t);
+      const plotWithinBlock = plotIndex % t;
+      const item = assignments[blockIndex][plotWithinBlock];
+      const hue = ((item.sequence - 1) * 137.508) % 360;
+      const color = `hsl(${hue}, 60%, 87%)`;
+
+      html += `<td class="plot" style="background:${color}">
+        <small>Plot ${plotIndex + 1}</small>
+        <small>Block ${blockIndex + 1}</small>
+        Treatment ${item.treatment}
+      </td>`;
+    }
+    html += "</tr>";
+  }
+  html += "</tbody></table>";
+  html += '<p class="note">Plot numbering proceeds top-to-bottom, then left-to-right. Each treatment appears once per block.</p>';
+  $("layoutOutput").innerHTML = html;
+}
+
+function printLayout() {
+  if (!randomized) {
+    alert("Generate the randomization and field layout first.");
+    return;
+  }
+  const win = window.open("", "_blank");
+  if (!win) {
+    alert("Please allow pop-ups to print the field layout.");
+    return;
+  }
+
+  win.document.write(`<!DOCTYPE html><html><head><title>RCBD Field Layout</title>
+  <style>
+  body{font-family:Arial;padding:20px}
+  h2,p{text-align:center}
+  table{border-collapse:collapse;width:100%;table-layout:fixed}
+  td{border:2px solid white;padding:12px 3px;text-align:center}
+  small{display:block;font-size:10px}
+  </style></head><body>
+  <h2>Randomized Complete Block Design</h2>
+  <p>${t} Treatments × ${r} Blocks</p>
+  ${$("layoutOutput").innerHTML}
+  <script>window.onload=()=>window.print();<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+/* Incomplete beta function, used to calculate F-test p-values. */
 function logGamma(z) {
-    const p = [
-        676.5203681218851, -1259.1392167224028,
-        771.32342877765313, -176.61502916214059,
-        12.507343278686905, -0.13857109526572012,
-        9.9843695780195716e-6, 1.5056327351493116e-7
-    ];
+  const p = [
+    676.5203681218851, -1259.1392167224028,
+    771.32342877765313, -176.61502916214059,
+    12.507343278686905, -0.13857109526572012,
+    9.9843695780195716e-6, 1.5056327351493116e-7
+  ];
+  if (z < 0.5) {
+    return Math.log(Math.PI) - Math.log(Math.sin(Math.PI*z)) - logGamma(1-z);
+  }
+  z -= 1;
+  let x = 0.99999999999980993;
+  for (let i = 0; i < p.length; i++) x += p[i] / (z+i+1);
+  const q = z + p.length - 0.5;
+  return 0.9189385332046727 + (z+0.5)*Math.log(q) - q + Math.log(x);
+}
 
-    if (z < 0.5) {
-        return Math.log(Math.PI) -
-            Math.log(Math.sin(Math.PI * z)) -
-            logGamma(1 - z);
-    }
+function betaFraction(a, b, x) {
+  const max = 200, eps = 3e-14, tiny = 1e-300;
+  const qab = a+b, qap = a+1, qam = a-1;
+  let c = 1, d = 1-qab*x/qap;
+  if (Math.abs(d) < tiny) d = tiny;
+  d = 1/d;
+  let h = d;
 
-    z -= 1;
-    let x = 0.99999999999980993;
+  for (let m = 1; m <= max; m++) {
+    const m2 = 2*m;
+    let aa = m*(b-m)*x/((qam+m2)*(a+m2));
+    d = 1+aa*d; if (Math.abs(d)<tiny) d=tiny;
+    c = 1+aa/c; if (Math.abs(c)<tiny) c=tiny;
+    d = 1/d; h *= d*c;
 
-    for (let i = 0; i < p.length; i++) {
-        x += p[i] / (z + i + 1);
-    }
-
-    const t = z + p.length - 0.5;
-
-    return 0.9189385332046727 +
-        (z + 0.5) * Math.log(t) - t + Math.log(x);
+    aa = -(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d = 1+aa*d; if (Math.abs(d)<tiny) d=tiny;
+    c = 1+aa/c; if (Math.abs(c)<tiny) c=tiny;
+    d = 1/d;
+    const delta = d*c;
+    h *= delta;
+    if (Math.abs(delta-1) < eps) break;
+  }
+  return h;
 }
 
 function regularizedBeta(x, a, b) {
-    if (x <= 0) return 0;
-    if (x >= 1) return 1;
-
-    const bt = Math.exp(
-        logGamma(a + b) - logGamma(a) - logGamma(b) +
-        a * Math.log(x) + b * Math.log1p(-x)
-    );
-
-    if (x < (a + 1) / (a + b + 2)) {
-        return bt * betaFraction(a, b, x) / a;
-    }
-
-    return 1 - bt * betaFraction(b, a, 1 - x) / b;
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  const front = Math.exp(
+    logGamma(a+b)-logGamma(a)-logGamma(b) +
+    a*Math.log(x)+b*Math.log(1-x)
+  );
+  if (x < (a+1)/(a+b+2)) return front*betaFraction(a,b,x)/a;
+  return 1-front*betaFraction(b,a,1-x)/b;
 }
 
-function fSurvival(f, df1, df2) {
-    if (!Number.isFinite(f) || f < 0) return NaN;
-    if (f === 0) return 1;
-
-    const x = df2 / (df2 + df1 * f);
-    return regularizedBeta(x, df2 / 2, df1 / 2);
+function fPValue(F, df1, df2) {
+  if (Number.isNaN(F) || F < 0) return NaN;
+  if (F === 0) return 1;
+  if (F === Infinity) return 0;
+  const x = df2/(df2+df1*F);
+  return Math.max(0, Math.min(1, regularizedBeta(x,df2/2,df1/2)));
 }
 
-function format(value) {
-    if (Number.isNaN(value)) return "—";
-    if (!Number.isFinite(value)) return "∞";
-    return value.toFixed(2);
+function fmt(x, d=4) {
+  if (Number.isNaN(x)) return "Undefined";
+  if (x === Infinity) return "∞";
+  return Number.isFinite(x) ? x.toFixed(d) : "—";
+}
+function pFmt(p) {
+  if (Number.isNaN(p)) return "Undefined";
+  return p < 0.001 ? "< .001" : p.toFixed(4);
 }
 
 function calculateRCBD() {
-    try {
-        const { t, b } = getDimensions();
-        const data = [];
+  try {
+    ({t, r} = getDimensions());
+    const data = [];
 
-        for (let i = 0; i < b; i++) {
-            const row = [];
-
-            for (let j = 0; j < t; j++) {
-                const input = document.getElementById(`x_${i}_${j}`);
-
-                if (!input || input.value.trim() === "" ||
-                    !Number.isFinite(Number(input.value))) {
-                    throw new Error(
-                        `Please enter a valid number for Block ${i + 1}, ` +
-                        `Treatment ${j + 1}.`
-                    );
-                }
-
-                row.push(Number(input.value));
-            }
-
-            data.push(row);
+    // Data table is treatment rows x block columns.
+    for (let i = 1; i <= t; i++) {
+      const row = [];
+      for (let b = 1; b <= r; b++) {
+        const input = $(`x_${i}_${b}`);
+        if (!input || input.value.trim() === "") {
+          throw new Error(`Enter a response for Treatment ${letter(i)}, Block ${b}.`);
         }
-
-        const N = t * b;
-        const grandTotal = data.flat().reduce((a, x) => a + x, 0);
-        const CF = grandTotal ** 2 / N;
-        const sumSquares = data.flat().reduce((a, x) => a + x * x, 0);
-        const totalSS = sumSquares - CF;
-
-        const treatmentTotals = Array(t).fill(0);
-        const blockTotals = Array(b).fill(0);
-
-        for (let i = 0; i < b; i++) {
-            for (let j = 0; j < t; j++) {
-                treatmentTotals[j] += data[i][j];
-                blockTotals[i] += data[i][j];
-            }
-        }
-
-        const treatmentMeans = treatmentTotals.map(x => x / b);
-        const blockMeans = blockTotals.map(x => x / t);
-
-        const treatmentSS =
-            treatmentTotals.reduce((s, x) => s + x * x / b, 0) - CF;
-
-        const blockSS =
-            blockTotals.reduce((s, x) => s + x * x / t, 0) - CF;
-
-        // Remove tiny floating-point rounding discrepancies.
-        const errorSS = totalSS - treatmentSS - blockSS;
-
-        if (errorSS < -1e-8) {
-            throw new Error("The calculated error SS is negative. Check the data.");
-        }
-
-        const cleanErrorSS = Math.max(0, errorSS);
-
-        const dfTreatment = t - 1;
-        const dfBlock = b - 1;
-        const dfError = (t - 1) * (b - 1);
-        const dfTotal = N - 1;
-
-        const msTreatment = treatmentSS / dfTreatment;
-        const msBlock = blockSS / dfBlock;
-        const msError = cleanErrorSS / dfError;
-
-        const fTreatment = msError > 0
-            ? msTreatment / msError
-            : (msTreatment > 0 ? Infinity : NaN);
-
-        const fBlock = msError > 0
-            ? msBlock / msError
-            : (msBlock > 0 ? Infinity : NaN);
-
-        const pTreatment = fSurvival(fTreatment, dfTreatment, dfError);
-        const pBlock = fSurvival(fBlock, dfBlock, dfError);
-
-        const treatmentRows = treatmentTotals.map((total, j) => `
-            <tr>
-                <td>Treatment ${j + 1}</td>
-                <td>${format(total)}</td>
-                <td>${format(treatmentMeans[j])}</td>
-            </tr>
-        `).join("");
-
-        const blockRows = blockTotals.map((total, i) => `
-            <tr>
-                <td>Block ${i + 1}</td>
-                <td>${format(total)}</td>
-                <td>${format(blockMeans[i])}</td>
-            </tr>
-        `).join("");
-
-        document.getElementById("summary").innerHTML = `
-            <table>
-                <thead>
-                    <tr>
-                        <th>Source</th>
-                        <th>Total</th>
-                        <th>Mean</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${treatmentRows}
-                    ${blockRows}
-                    <tr>
-                        <th>Grand Total</th>
-                        <th>${format(grandTotal)}</th>
-                        <th>${format(grandTotal / N)}</th>
-                    </tr>
-                </tbody>
-            </table>
-        `;
-
-        const rows = [
-            ["Treatments", treatmentSS, dfTreatment,
-                msTreatment, fTreatment, pTreatment],
-            ["Blocks", blockSS, dfBlock,
-                msBlock, fBlock, pBlock],
-            ["Error", cleanErrorSS, dfError, msError, null, null],
-            ["Total", totalSS, dfTotal, null, null, null]
-        ];
-
-        document.getElementById("anova").innerHTML = `
-            <table>
-                <thead>
-                    <tr>
-                        <th>Source of Variation</th>
-                        <th>SS</th>
-                        <th>df</th>
-                        <th>MS</th>
-                        <th>F-value</th>
-                        <th>p-value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows.map(r => `
-                        <tr>
-                            <td>${r[0]}</td>
-                            <td>${format(r[1])}</td>
-                            <td>${r[2]}</td>
-                            <td>${r[3] === null ? "—" : format(r[3])}</td>
-                            <td>${r[4] === null ? "—" : format(r[4])}</td>
-                            <td>${r[5] === null ? "—" :
-                                (r[5] < 0.001 ? "< .001" : format(r[5]))}</td>
-                        </tr>
-                    `).join("")}
-                </tbody>
-            </table>
-        `;
-
-        document.getElementById("results").style.display = "block";
-        document.getElementById("message").textContent = "";
-    } catch (error) {
-        document.getElementById("message").textContent = error.message;
+        const value = Number(input.value);
+        if (!Number.isFinite(value)) throw new Error("All responses must be numeric.");
+        row.push(value);
+      }
+      data.push(row);
     }
+
+    const N = t*r;
+    const all = data.flat();
+    const G = all.reduce((s,x)=>s+x,0);
+    const sumSquares = all.reduce((s,x)=>s+x*x,0);
+    const CF = G*G/N;
+    const SST = sumSquares-CF;
+
+    const treatmentTotals = data.map(row=>row.reduce((s,x)=>s+x,0));
+    const blockTotals = Array.from({length:r},(_,b)=>
+      data.reduce((s,row)=>s+row[b],0));
+
+    const SSTr = treatmentTotals.reduce((s,x)=>s+x*x/r,0)-CF;
+    const SSB = blockTotals.reduce((s,x)=>s+x*x/t,0)-CF;
+    let SSE = SST-SSTr-SSB;
+
+    const scale = Math.max(1,Math.abs(sumSquares),Math.abs(CF));
+    if (SSE < -1e-9*scale) throw new Error("Negative error sum of squares. Check the data.");
+    if (Math.abs(SSE) < 1e-12*scale) SSE = 0;
+
+    const dfTr=t-1, dfB=r-1, dfE=(t-1)*(r-1), dfT=N-1;
+    const MSTr=SSTr/dfTr, MSB=SSB/dfB, MSE=SSE/dfE;
+    const FTr=MSE===0?(MSTr===0?NaN:Infinity):MSTr/MSE;
+    const FB=MSE===0?(MSB===0?NaN:Infinity):MSB/MSE;
+    const pTr=fPValue(FTr,dfTr,dfE);
+    const pB=fPValue(FB,dfB,dfE);
+    const alpha=Number($("alpha").value);
+    const grandMean=G/N;
+    const CV=grandMean===0?NaN:Math.sqrt(MSE)/Math.abs(grandMean)*100;
+
+    // CRD comparison: block variation is included in the residual SS.
+    const dfCRD=N-t;
+    const SSECRD=SSB+SSE;
+    const MSECRD=SSECRD/dfCRD;
+    const RE=MSE===0?(MSECRD===0?NaN:Infinity):MSECRD/MSE;
+
+    const a={N,G,grandMean,SST,SSTr,SSB,SSE,dfTr,dfB,dfE,dfT,
+      MSTr,MSB,MSE,FTr,FB,pTr,pB,alpha,CV,dfCRD,SSECRD,MSECRD,RE};
+
+    renderHypotheses(a);
+    renderANOVA(a);
+    renderCV(a);
+    renderEfficiency(a);
+    $("results").classList.remove("hidden");
+    $("message").textContent="";
+  } catch (e) {
+    $("message").textContent=e.message;
+  }
 }
 
-createTable();
-</script>
+function renderHypotheses(a) {
+  const trReject=!Number.isNaN(a.pTr)&&a.pTr<a.alpha;
+  const bReject=!Number.isNaN(a.pB)&&a.pB<a.alpha;
 
+  const decision=(p,reject)=>Number.isNaN(p)
+    ?"Test undefined because the error mean square is zero."
+    :reject?"Reject H₀":"Fail to reject H₀";
+
+  const trMeaning=Number.isNaN(a.pTr)
+    ?"The test is undefined because the error mean square is zero."
+    :trReject
+      ?"At least one treatment population mean differs significantly."
+      :"There is insufficient evidence to conclude that treatment means differ.";
+
+  const bMeaning=Number.isNaN(a.pB)
+    ?"The test is undefined because the error mean square is zero."
+    :bReject
+      ?"Block effects differ significantly after accounting for treatments."
+      :"There is insufficient evidence to conclude that block effects differ.";
+
+  $("hypotheses").innerHTML=`
+  <div class="hypothesis">
+    <h3>Test A: Treatment Effect</h3>
+    <p><strong>Step 1 — Hypotheses</strong><br>
+    H₀: μ₁ = μ₂ = … = μ${t}.<br>
+    Hₐ: At least one treatment mean differs.</p>
+    <p><strong>Step 2 — Significance level:</strong> α = ${a.alpha}</p>
+    <p><strong>Step 3 — Test statistic:</strong>
+    F = MS Treatment / MS Error = ${fmt(a.FTr)};
+    df = (${a.dfTr}, ${a.dfE}).</p>
+    <p><strong>Step 4 — Decision rule:</strong>
+    p = ${pFmt(a.pTr)}. Reject H₀ if p &lt; α.</p>
+    <p><strong>Step 5 — Decision:</strong> ${decision(a.pTr,trReject)}</p>
+    <p><strong>Step 6 — Interpretation:</strong> ${trMeaning}</p>
+  </div>
+  <div class="hypothesis">
+    <h3>Test B: Block Effect</h3>
+    <p><strong>Step 1 — Hypotheses</strong><br>
+    H₀: All block effects are zero.<br>
+    Hₐ: At least one block effect differs from zero.</p>
+    <p><strong>Step 2 — Significance level:</strong> α = ${a.alpha}</p>
+    <p><strong>Step 3 — Test statistic:</strong>
+    F = MS Block / MS Error = ${fmt(a.FB)};
+    df = (${a.dfB}, ${a.dfE}).</p>
+    <p><strong>Step 4 — Decision rule:</strong>
+    p = ${pFmt(a.pB)}. Reject H₀ if p &lt; α.</p>
+    <p><strong>Step 5 — Decision:</strong> ${decision(a.pB,bReject)}</p>
+    <p><strong>Step 6 — Interpretation:</strong> ${bMeaning}</p>
+  </div>
+  <p class="note">A significant treatment test means at least one treatment mean differs; it does not identify which treatments differ. A suitable post hoc test may be needed.</p>`;
+}
+
+function renderANOVA(a) {
+  const rows=[
+    ["Treatments",a.SSTr,a.dfTr,a.MSTr,a.FTr,a.pTr],
+    ["Blocks / Replications",a.SSB,a.dfB,a.MSB,a.FB,a.pB],
+    ["Error",a.SSE,a.dfE,a.MSE,null,null],
+    ["Total",a.SST,a.dfT,null,null,null]
+  ];
+
+  let html="<table><thead><tr><th>Source of Variation</th><th>SS</th><th>df</th><th>MS</th><th>F</th><th>p-value</th></tr></thead><tbody>";
+  rows.forEach(row=>{
+    html+=`<tr><th>${row[0]}</th><td>${fmt(row[1])}</td><td>${row[2]}</td>
+    <td>${row[3]===null?"—":fmt(row[3])}</td>
+    <td>${row[4]===null?"—":fmt(row[4])}</td>
+    <td>${row[5]===null?"—":pFmt(row[5])}</td></tr>`;
+  });
+  $("anova").innerHTML=html+"</tbody></table>"+
+    `<p class="note">Significance level: α = ${a.alpha}. Decisions use p-values.</p>`;
+}
+
+function renderCV(a) {
+  let interpretation;
+  if (!Number.isFinite(a.CV)) interpretation="CV is undefined because the grand mean is zero.";
+  else if (a.CV < 10) interpretation="Residual variation is relatively low compared with the grand mean.";
+  else if (a.CV < 20) interpretation="Residual variation is moderate compared with the grand mean.";
+  else interpretation="Residual variation is relatively high compared with the grand mean; consider the study context.";
+
+  $("cvOutput").innerHTML=`<div class="result">
+    <p><strong>Grand mean:</strong> ${fmt(a.grandMean)}</p>
+    <p><strong>Error mean square:</strong> ${fmt(a.MSE)}</p>
+    <p><strong>CV:</strong> ${fmt(a.CV,2)}%</p>
+    <p><strong>Interpretation:</strong> ${interpretation}</p>
+  </div><p class="note">These CV bands are only rough guidelines. Appropriate values depend on the discipline, response variable, and measurement scale.</p>`;
+}
+
+function renderEfficiency(a) {
+  const reText=Number.isFinite(a.RE)?fmt(a.RE*100,2)+"%":
+    a.RE===Infinity?"Unbounded":"Undefined";
+  let interpretation;
+
+  if (!Number.isFinite(a.RE)) {
+    interpretation=a.RE===Infinity
+      ?"The RCBD error mean square is zero while the CRD-comparison error mean square is positive. The ratio is unbounded."
+      :"The ratio is undefined because both error mean squares are zero or otherwise undefined.";
+  } else if (a.RE>1) {
+    interpretation="The CRD-comparison error mean square is larger than the RCBD error mean square. This indicates greater relative precision for RCBD under this comparison.";
+  } else if (a.RE<1) {
+    interpretation="The RCBD error mean square is larger than the CRD-comparison error mean square in this calculation.";
+  } else {
+    interpretation="The two error mean squares are equal.";
+  }
+
+  $("efficiencyOutput").innerHTML=`<div class="result">
+    <p><strong>CRD-comparison error SS:</strong>
+    SS Block + SS Error (RCBD) = ${fmt(a.SSECRD)}</p>
+    <p><strong>CRD-comparison error df:</strong> N − t = ${a.dfCRD}</p>
+    <p><strong>CRD-comparison error MS:</strong> ${fmt(a.MSECRD)}</p>
+    <p><strong>RCBD error MS:</strong> ${fmt(a.MSE)}</p>
+    <div class="formula">RE (%) = [MS Error (CRD) / MS Error (RCBD)] × 100</div>
+    <h3>${reText}</h3>
+    <p><strong>Interpretation:</strong> ${interpretation}</p>
+  </div><p class="note">RE above 100% indicates a larger estimated error mean square under the CRD comparison. It is not the percentage reduction in error.</p>`;
+}
+
+function clearData() {
+  document.querySelectorAll(".data-input").forEach(input=>input.value="");
+  $("results").classList.add("hidden");
+  $("message").textContent="";
+}
+
+applyDesign();
+</script>
 </body>
 </html>
-
-
