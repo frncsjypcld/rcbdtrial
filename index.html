@@ -812,7 +812,7 @@ function fmt(x, d = 4) {
 
 function pFmt(p) {
   if (Number.isNaN(p)) return "Undefined";
-  return p < 0.001 ? "< .001" : p.toFixed(4);
+  return p < 0.001 ? "< .001" : p.toFixed(3);
 }
 
 function calculateRCBD() {
